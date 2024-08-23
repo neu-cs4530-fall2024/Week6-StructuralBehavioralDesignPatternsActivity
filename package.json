@@ -1,13 +1,13 @@
 {
-  "name": "week-5-creational-DP",
+  "name": "week-6-StructuralBehavioral-DP",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/week-5-creational-DP.js",
+  "main": "dist/week-6-StructuralBehavioral-DP.js",
   "entry": [
     "./src/index.ts"
   ],
   "scripts": {
-    "start": "npm run build && node dist/week-5-creational-DP.js",
+    "start": "npm run build && node dist/week-6-StructuralBehavioral-DP.js",
     "build": "node scripts/webpack.js",
     "build:prod": "node scripts/webpack.js --prod",
     "build:debug": "node scripts/webpack.js --debug",

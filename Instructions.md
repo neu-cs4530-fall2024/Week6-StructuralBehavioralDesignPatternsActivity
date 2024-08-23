@@ -1,6 +1,7 @@
-# Week 5 Class Activity: Creational Design Patterns
+# Week 6 Class Activity: Structural and Behavioral Design Patterns
 
-In this activity, we will start with a version of the calculator that we developed during the previous class activity on Test Driven Development.  Your task is to modify the code to introduce Creational Design Patterns.
+In this activity, we will start with a version of the calculator that implements operator precedence 
+using the State design pattern.
 
 ## Key Ideas
 
