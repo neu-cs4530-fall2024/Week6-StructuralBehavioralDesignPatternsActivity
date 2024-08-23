@@ -142,4 +142,35 @@ describe('CalculatorModel', (): void => {
     expect(displayValue).toEqual('2.00');    
   });
 
+  it('should display `82` when equals is clicked on `100 + 1 - 8 * 1 * 3 / 4 + 7 - 10 / 2 * 4', (): void => {
+
+    standardCalculator.pressNumericKey(NumericKeys.ONE);
+    standardCalculator.pressNumericKey(NumericKeys.ZERO);
+    standardCalculator.pressNumericKey(NumericKeys.ZERO);
+    standardCalculator.pressOperatorKey(OperatorKeys.PLUS);
+    standardCalculator.pressNumericKey(NumericKeys.ONE);
+    standardCalculator.pressOperatorKey(OperatorKeys.MINUS);
+    standardCalculator.pressNumericKey(NumericKeys.EIGHT);
+    standardCalculator.pressOperatorKey(OperatorKeys.MULT);
+    standardCalculator.pressNumericKey(NumericKeys.ONE);
+    standardCalculator.pressOperatorKey(OperatorKeys.MULT);
+    standardCalculator.pressNumericKey(NumericKeys.THREE);
+    standardCalculator.pressOperatorKey(OperatorKeys.DIV);
+    standardCalculator.pressNumericKey(NumericKeys.FOUR);
+    standardCalculator.pressOperatorKey(OperatorKeys.PLUS);
+    standardCalculator.pressNumericKey(NumericKeys.SEVEN);
+    standardCalculator.pressOperatorKey(OperatorKeys.MINUS);
+    standardCalculator.pressNumericKey(NumericKeys.ONE);
+    standardCalculator.pressNumericKey(NumericKeys.ZERO);
+    standardCalculator.pressOperatorKey(OperatorKeys.DIV);
+    standardCalculator.pressNumericKey(NumericKeys.TWO);
+    standardCalculator.pressOperatorKey(OperatorKeys.MULT);
+    standardCalculator.pressNumericKey(NumericKeys.FOUR);
+    standardCalculator.pressActionKey(ActionKeys.EQUALS);
+    const displayValue: string = standardCalculator.display();
+
+    expect(displayValue).toEqual('82');
+
+  });
+
 });
