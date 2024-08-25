@@ -1,7 +1,7 @@
 
 import { CalculatorModel } from './index';
 
-describe('week4-tdd', (): void => {
+describe('week6-structural-behavioral-DP', (): void => {
 
   describe('CalculatorModel', (): void => {
 
