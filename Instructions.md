@@ -1,50 +1,26 @@
 # Week 6 Class Activity: Structural and Behavioral Design Patterns
 
-In this activity, we will start with a version of the calculator that implements operator precedence 
-using the State design pattern.
+In this activity, we will start with a version of the calculator that  
+uses the State design pattern to implement operator precedence.
 
 ## Key Ideas
 
 In this activity, we will follow these steps:
-1. Refactor the code to introduce a design pattern.
-2. Update the tests accordingly and run them to make sure that they pass.
-3. Refactor code to remove duplication/inefficiencies.
+1. Understand how the `State` design pattern is used to implement operator precedence
+2. Refactor the code to introduce the `Observer` design pattern.
+3. Update the tests accordingly and run them to make sure that they still pass.
+4. Refactor code to remove duplication/inefficiencies.
 
 ## Starter Code Overview
 
-To enforce some consistency across implementations (and allow us to build on the same code in the next few activities), we will start with a simple solution that we developed during the previous class activity on Test-Driven Development. 
+To enforce some consistency across implementations (and allow us to build on the same code in future activities), we will start with a Calculator that implements operator precedence using the State design pattern.
 
-The bulk of the implementation in this activity is in 2 files, namely `src/models/calculator.model.ts` and `src/models/calculator.model.spec.ts`.
-We have enforced high level constraints on the implementation through the `ICalculatorModel` interface at `src/interfaces/calculator-model.interface.ts`.
-The interface requires the existence of 4 methods on the CalculatorModel as shown below:
+The solution was briefly reviewed during today's class, and the design pattern involves the following files:
+  * File `calculator-state.interface.ts` declares an interface `ICalculatorState` that defines the functionality of the different states 
+  * File `abstract-calculator-state.ts` defines an abstract class `AbstractCalculatorState` that implements `ICalculatorState`. This class contains functionality that is common to all states, and it maintains a reference to the context (i.e., a reference to an instance of `CalculatorModel`)
+  * Files `entering-first-number-state.ts`, `entering-second-number-state.ts`, and `entering-third-number-state.ts` define states corresponding to the state machine that was shown in class. The methods in these classes (e.g. `digit` and `binaryOperator` define the state-specific behaviors of the corresponding operations)
+  * Class `CalculatorModel` initializes the state machine and delegates all operations to it. It defines a method `changeState` that is invoked by the various concrete states when a state transition is required.
 
-```typescript
-import { ActionKeys } from '../enums/action-keys.enum';
-import { NumericKeys } from '../enums/numeric-keys.enum';
-import { OperatorKeys } from '../enums/operator-keys.enum';
-
-export interface ICalculatorModel {
-  // numeric key pressed <0, 1, 2, 3, 4, 5, 6, 7, 8, 9>
-  pressNumericKey(key: NumericKeys): void;
-
-  // operator key pressed <+, -, *, />
-  pressOperatorKey(key: OperatorKeys): void;
-
-  // action key pressed <C, =, .>
-  pressActionKey(key: ActionKeys): void;
-
-  // returns the contents of the calculator's display
-  display(): string;
-
-}
-
-```
-
-The interface assumes that there are handlers for 3 types of key presses: numeric (0 through 9), operators (+, -, *, /), actions (C, =, .).
-Additionally, there is a display method which returns the current value on the calculator screen.
-The values accepted by the different keys can be modified in `src/enums/*.enum.ts`
-
-To get you started, we have provided an implementation this interface called CalculatorModel at `src/models/calculator.model.ts`. Please begin by examining the code. Then run the tests and confirm that they pass.
 
 ## Getting Started
 
@@ -54,59 +30,68 @@ Once the installation is complete, run the test commands `npm run test`. You sho
 ```bash
 $ npm run test
 
-> week-5-creational-DP@1.0.0 test
+> week-6-StructuralBehavioral-DP@1.0.0 test
 > node scripts/jest.js
 
  PASS  src/models/calculator.model.spec.ts
   CalculatorModel
-    ✓ should contain a CalculatorModel class that implements ICalculatorModel (2 ms)
-    ✓ should have an empty display on init
-    ✓ should display `1` when the `1` key is pressed
-    ✓ should display `2` when the `2` key is pressed
-    ✓ should display `98` when the `9` key is pressed followed by the `8` key
-    ✓ should display `13` when equals is clicked on `7 + 6`
-    ✓ should display `5` when equals is clicked on `15 - 10`
+    ✓ should contain a CalculatorModel class that implements ICalculatorModel (1 ms)
+    ✓ should display `13` when equals is clicked on `7 + 6` (1 ms)
+    ✓ should display `5` when equals is clicked on `15 - 10` (1 ms)
     ✓ should display `21` when equals is clicked on `3 * 7` (1 ms)
     ✓ should display `12` when equals is clicked on `144 / 12` (1 ms)
+    ✓ should display `14` when equals is clicked on `2 + 3 * 4`
+    ✓ should return `90` when equals is clicked on `100 + 200 / 10 - 3 * 10`
+    ✓ should display `82` when equals is clicked on `100 + 1 - 8 * 1 * 3 / 4 + 7 - 10 / 2 * 4
 
  PASS  src/index.spec.ts
-  week5-creational-DP
+  week6-structural-behavioral-DP
     CalculatorModel
-      ✓ CalculatorModel exists (1 ms)
+      ✓ CalculatorModel exists
 
 Test Suites: 2 passed, 2 total
-Tests:       10 passed, 10 total
+Tests:       9 passed, 9 total
 Snapshots:   0 total
-Time:        0.503 s, estimated 1 s
+Time:        0.453 s, estimated 1 s
 Ran all test suites.
 ```
 
-## Abstract Factory
+## Introducing the Observer Design Pattern
 
-Let's suppose that we want to support two types of calculators:
-- a `StandardCalculator` that provides the functionality that exists now, and
-- a `RoundingCalculator` that rounds up values (e.g., 4/3 would evaluate to 1.33 if two decimals of precision are used)
-
-### Step 1
-  - rename class `CalculatorModel` to `StandardCalculatorModel`
-  - update the tests and ensure that they still pass by running them
+ ### Step 1
+  - please study the code in the classes mentioned above, and make sure that you understand what roles they play in the `State` design pattern
 
 ### Step 2  
-  - define a class `AbstractCalculatorModelFactory` that declares/defines methods that are common to both calculators,
-  - define a class `StandardCalculatorModelFactory`, which extends `AbstractCalculatorModelFactory`, for creating a `StandardCalculatorModel`
-  - update the tests to use the factory to create a `StandardCalculatorModel` object instead of calling its constructor directly
-  - confirm that the tests pass
+  We begin by defining our observer. This involves the following steps:
 
+  - Define an interface `ICalculatorObserver` that declares a method 
+
+    ```typescript
+    update(message: string): void
+    ```
+ - Define a class `CalculatorObserver` that implements `ICalculatorObserver` by defining the update method so that it prints the message to standard output 
+       
 ### Step 3
-  - create a class `RoundingCalculator` that implements the rounding calculator, giving its constructor a parameter `nrDecimals` that represents the number of decimals to use
-  - implement a `RoundingCalculatorModelFactory`, which extends `AbstractCalculatorModelFactory`, for creating a `RoundingCalculatorModel`
-  - write a few tests that use `RoundingCalculatorModel` and `RoundingCalculatorModelFactory`
-
+   Next, modify the class `CalculatorModel`, which is the subject in the `Observer` design pattern by 
+  - maintaining an array of `ICalculatorObserver`s
+  - adding methods `attach` and `detach` for adding and removing observers
+  
 ### Step 4
-  - apply the `Singeton` design pattern to `StandardCalculatorModelFactory` and `RoundingCalculatorModelFactory`
-  - ensure that your tests still pass
+  - now, define a method 
 
-For these steps, you are encouraged to work in TDD-style as much as possible, e.g., by writing tests before you fully implement your `RoundingCalculator`
+    ```typescript
+    public notify(message: string): void 
+    ```
+in class `CalculatorModel` that notifies all of the observers of the message
+
+  - note: the `notify` method also needs to be declared in the interface `IContext` that is used by the concrete state classes to refer to the `CalculatorModel`
+
+### Step 5  
+  - modify the code so that `notify` is invoked whenever the calculator performs a calculation
+  
+### Step 6  
+  - modify the last test in file `calculator.model.spec.ts` so that it uses the observer
+  - confirm that observer prints messages as expected
 
 ## Submission
 
