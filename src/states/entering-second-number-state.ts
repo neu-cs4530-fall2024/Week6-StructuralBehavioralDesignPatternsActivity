@@ -2,12 +2,15 @@ import { OperatorKeys } from '../enums/operator-keys.enum';
 import { IContext, IStateData } from '../interfaces';
 import { ICalculatorState } from '../interfaces/calculator-state.interface';
 import { StateData } from '../models/state-data.model';
-import { EnteringFirstNumberState } from './entering-first-number.state';
-import { EnteringThirdNumberState } from './entering-third-number.state';
+import { AbstractCalculatorState } from './abstract-calculator-state';
+import { EnteringFirstNumberState } from './entering-first-number-state';
+import { EnteringThirdNumberState } from './entering-third-number-state';
 import { ErrorState } from './error.state';
 
-export class EnteringSecondNumberState implements ICalculatorState {
-  public constructor(private _context: IContext, private _data: IStateData) {}
+export class EnteringSecondNumberState extends AbstractCalculatorState implements ICalculatorState {
+  public constructor(context: IContext, data: IStateData) {
+    super(context, data);
+  }
 
   public digit(digit: string): void {
     this._data.secondBuffer =
@@ -50,7 +53,7 @@ export class EnteringSecondNumberState implements ICalculatorState {
           new EnteringFirstNumberState(
             this._context,
             new StateData.Builder()
-              .withFirstBuffer((firstNumber + secondNumber).toString())
+              .withFirstBuffer(this.add(firstNumber, secondNumber).toString())
               .build()
           )
         );
@@ -60,7 +63,7 @@ export class EnteringSecondNumberState implements ICalculatorState {
           new EnteringFirstNumberState(
             this._context,
             new StateData.Builder()
-              .withFirstBuffer((firstNumber - secondNumber).toString())
+              .withFirstBuffer(this.subtract(firstNumber, secondNumber).toString())
               .build()
           )
         );
@@ -70,7 +73,7 @@ export class EnteringSecondNumberState implements ICalculatorState {
           new EnteringFirstNumberState(
             this._context,
             new StateData.Builder()
-              .withFirstBuffer((firstNumber * secondNumber).toString())
+              .withFirstBuffer(this.multiply(firstNumber, secondNumber).toString())
               .build()
           )
         );
@@ -80,7 +83,7 @@ export class EnteringSecondNumberState implements ICalculatorState {
           new EnteringFirstNumberState(
             this._context,
             new StateData.Builder()
-              .withFirstBuffer((firstNumber / secondNumber).toString())
+              .withFirstBuffer(this.divide(firstNumber, secondNumber).toString())
               .build()
           )
         );
@@ -88,16 +91,6 @@ export class EnteringSecondNumberState implements ICalculatorState {
       default:
         this._context.changeState(new ErrorState(this._context, this._data));
     }
-  }
-
-  public clear(): void {
-    this._context.changeState(
-      new EnteringFirstNumberState(this._context, new StateData.Builder().build())
-    );
-  }
-
-  public display(): string {
-    return this._data.display();
   }
 
   private evaluateWhenLowPrecedenceNext(nextOperator: OperatorKeys): void {
@@ -110,17 +103,17 @@ export class EnteringSecondNumberState implements ICalculatorState {
 
     switch (this._data.firstOperator) {
       case OperatorKeys.PLUS:
-        this._data.firstBuffer = (firstNumber + secondNumber).toString();
+        this._data.firstBuffer = this.add(firstNumber, secondNumber).toString();
         break;
       case OperatorKeys.MINUS:
-        this._data.firstBuffer = (firstNumber - secondNumber).toString();
+        this._data.firstBuffer = this.subtract(firstNumber, secondNumber).toString();
         break;
       case OperatorKeys.MULT:
-        this._data.firstBuffer = (firstNumber * secondNumber).toString();
+        this._data.firstBuffer = this.multiply(firstNumber, secondNumber).toString();
         break;
       case OperatorKeys.DIV:
         if (secondNumber !== 0) {
-          this._data.firstBuffer = (firstNumber / secondNumber).toString();
+          this._data.firstBuffer = this.divide(firstNumber, secondNumber).toString();
         } else {
           this._context.changeState(new ErrorState(this._context, this._data));
         }
@@ -143,7 +136,7 @@ export class EnteringSecondNumberState implements ICalculatorState {
     switch (this._data.firstOperator) {
       case OperatorKeys.MULT:
         // If the first operator was *, apply it
-        this._data.firstBuffer = (firstNumber * secondNumber).toString();
+        this._data.firstBuffer = this.multiply(firstNumber, secondNumber).toString();
         this._data.secondBuffer = '';
         this._data.firstOperator = nextOperator;
         break;
@@ -153,7 +146,7 @@ export class EnteringSecondNumberState implements ICalculatorState {
           // check for div by zero
           this._context.changeState(new ErrorState(this._context, this._data));
         } else {
-          this._data.firstBuffer = (firstNumber / secondNumber).toString();
+          this._data.firstBuffer = this.divide(firstNumber, secondNumber).toString();
           this._data.secondBuffer = '';
           this._data.firstOperator = nextOperator;
         }
@@ -173,3 +166,4 @@ export class EnteringSecondNumberState implements ICalculatorState {
     }
   }
 }
+

@@ -3,7 +3,7 @@ import { NumericKeys } from '../enums';
 import { IContext, IStateData } from '../interfaces';
 import { ICalculatorState } from '../interfaces/calculator-state.interface';
 import { StateData } from '../models/state-data.model';
-import { EnteringFirstNumberState } from './entering-first-number.state';
+import { EnteringFirstNumberState } from './entering-first-number-state';
 
 // in the ErrorState, pressing "C" will reset the calculator to its original state; other keys have no effect
 export class ErrorState implements ICalculatorState {

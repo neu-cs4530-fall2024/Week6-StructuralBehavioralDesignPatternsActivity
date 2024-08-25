@@ -2,12 +2,15 @@ import { OperatorKeys } from '../enums/operator-keys.enum';
 import { IContext, IStateData } from '../interfaces';
 import { ICalculatorState } from '../interfaces/calculator-state.interface';
 import { StateData } from '../models/state-data.model';
-import { EnteringFirstNumberState } from './entering-first-number.state';
-import { EnteringSecondNumberState } from './entering-second-number.state';
+import { AbstractCalculatorState } from './abstract-calculator-state';
+import { EnteringFirstNumberState } from './entering-first-number-state';
+import { EnteringSecondNumberState } from './entering-second-number-state';
 import { ErrorState } from './error.state';
 
-export class EnteringThirdNumberState implements ICalculatorState {
-  public constructor(private _context: IContext, private _data: IStateData) {}
+export class EnteringThirdNumberState extends AbstractCalculatorState implements ICalculatorState {
+  public constructor(context: IContext, data: IStateData) {
+    super(context, data);
+  }
 
   public digit(digit: string): void {
     this._data.thirdBuffer =
@@ -31,8 +34,6 @@ export class EnteringThirdNumberState implements ICalculatorState {
       this._data.thirdBuffer === '' ? '0' : this._data.thirdBuffer
     );
 
-    let result: number;
-
     switch (operator) {
       case OperatorKeys.MULT:
       case OperatorKeys.DIV:
@@ -41,13 +42,11 @@ export class EnteringThirdNumberState implements ICalculatorState {
         } else {
           switch (this._data.secondOperator){ 
             case OperatorKeys.MULT:
-              result = secondNumber * thirdNumber;
-              this._data.secondBuffer = result.toString();
+              this._data.secondBuffer = this.multiply(secondNumber, thirdNumber).toString();
               this._data.thirdBuffer = '';
               break;
             case OperatorKeys.DIV:
-              result = secondNumber / thirdNumber;
-              this._data.secondBuffer = result.toString();
+              this._data.secondBuffer = this.divide(secondNumber, thirdNumber).toString();
               this._data.thirdBuffer = '';
               break;
           }
@@ -78,14 +77,14 @@ export class EnteringThirdNumberState implements ICalculatorState {
     let result: number;
 
     if (this._data.secondOperator === OperatorKeys.MULT) {
-      result = secondNumber * thirdNumber;
+      result = parseFloat(this.multiply(secondNumber, thirdNumber).toString());
     } else {
       // (this._data.secondOperator === OperatorKeys.DIV)
       if (thirdNumber === 0) {
         this._context.changeState(new ErrorState(this._context, this._data));
         return;
       } else {
-        result = secondNumber / thirdNumber;
+        result = parseFloat(this.divide(secondNumber, thirdNumber).toString());
       }
     }
 
@@ -93,7 +92,7 @@ export class EnteringThirdNumberState implements ICalculatorState {
       this._context.changeState(
         new EnteringFirstNumberState(
           this._context,
-          new StateData.Builder().withFirstBuffer((firstNumber + result).toString()).build()
+          new StateData.Builder().withFirstBuffer(this.add(firstNumber, result).toString()).build()
         )
       );
     } else {
@@ -101,20 +100,10 @@ export class EnteringThirdNumberState implements ICalculatorState {
       this._context.changeState(
         new EnteringFirstNumberState(
           this._context,
-          new StateData.Builder().withFirstBuffer((firstNumber - result).toString()).build()
+          new StateData.Builder().withFirstBuffer(this.subtract(firstNumber, result).toString()).build()
         )
       );
     }
-  }
-
-  public clear(): void {
-    this._context.changeState(
-      new EnteringFirstNumberState(this._context, new StateData.Builder().build())
-    );
-  }
-
-  public display(): string {
-    return this._data.display();
   }
 
   private evaluateWhenLowPrecedenceNext(nextOperator: OperatorKeys): void {
@@ -133,12 +122,15 @@ export class EnteringThirdNumberState implements ICalculatorState {
 
     switch (this._data.secondOperator) {
       case OperatorKeys.MULT:
-        result = secondNumber * thirdNumber;
+        // result = secondNumber * thirdNumber;
+        result = this.multiply(secondNumber, thirdNumber);
         if (this._data.firstOperator === OperatorKeys.PLUS) {
-          result = firstNumber + result;
+          // result = firstNumber + result;
+          result = this.add(firstNumber, result);
         } else {
           // (this._data.firstOperator === OperatorKeys.MINUS)
-          result = firstNumber - result;
+          // result = firstNumber - result;
+          result = this.subtract(firstNumber, result);
         }
         newData = new StateData.Builder()
           .withFirstBuffer(result.toString())
@@ -150,10 +142,10 @@ export class EnteringThirdNumberState implements ICalculatorState {
         if (thirdNumber !== 0) {
           result = secondNumber / thirdNumber;
           if (this._data.firstOperator === OperatorKeys.PLUS) {
-            result = firstNumber + result;
+            result = this.add(firstNumber, result);
           } else {
             // (this._data.firstOperator === OperatorKeys.MINUS)
-            result = firstNumber - result;
+            result = this.subtract(firstNumber, result);
           }
           newData = new StateData.Builder()
             .withFirstBuffer(result.toString())

@@ -5,7 +5,7 @@ import { OperatorKeys } from '../enums/operator-keys.enum';
 import { IContext } from '../interfaces';
 import { ICalculatorModel } from '../interfaces/calculator-model.interface';
 import { ICalculatorState } from '../interfaces/calculator-state.interface';
-import { EnteringFirstNumberState } from '../states/entering-first-number.state';
+import { EnteringFirstNumberState } from '../states/entering-first-number-state';
 import { StateData } from './state-data.model';
 
 export class CalculatorModel implements ICalculatorModel, IContext {
